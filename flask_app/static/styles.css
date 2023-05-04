@@ -1,0 +1,76 @@
+movie {
+    max-width: 80;
+    padding: 1; 
+}
+
+.rating-btn {
+    width: 100%;
+}
+
+.review-btn {
+    width: 85%;
+}
+
+.card-body img {
+    max-width: 200;
+}
+
+.media-list {
+    border-top: 1px dashed rgb(150, 150, 150);
+}
+
+.review-item {
+    border-bottom: 1px dashed #a5a5a5;
+}
+
+.propic {
+    max-width: 50%;
+}
+
+.card:hover{
+    transform: scale(1.02);
+    box-shadow: 0 10px 20px rgba(0,0,0,.12), 0 4px 8px rgba(0,0,0,.06);
+}
+
+.card:hover img{
+    transform: scale(1.1);
+    width: 100%;
+}
+
+.card img{
+    transition: transform 500ms ease;
+    width: 100%;
+}
+
+.card{
+    transition: all 500ms ease;
+}
+
+.card-a{
+    color:black;
+}
+.card-a:hover{
+    color:black;
+    text-decoration: none;
+}
+
+.comment-pic {
+    max-width: 64px;
+}
+
+figure img{
+    max-height: 300px;
+    width: 100%;
+    object-fit:cover;
+    border-radius: 5px;
+    box-shadow: 0px 5px 20px rgba(129, 129, 129, 0.577);
+}
+
+/* .nav-user {
+    border-right: 1px #1d1d1d;
+} */
+
+.token {
+    max-width: 800;
+    word-wrap: break-word;
+}

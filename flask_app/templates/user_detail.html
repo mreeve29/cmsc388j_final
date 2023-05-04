@@ -1,0 +1,72 @@
+{% extends "header.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    
+        <h1 style="text-decoration: underline;">{{ username }}'s Profile</h1>
+    
+</div>
+<div class="row">
+    <div class="col">
+        <h2>{{ username }}'s Favorites:</h2>
+    </div>
+</div>
+<div class="row justify-content-center">
+    {% if restaurants %}
+        {% for restaurant in restaurants %}
+            <div class="col-auto my-2">
+                <a class="card-a" href="{{url_for('restaurants.restaurant_detail', id=restaurant.restaurant_id)}}">
+                    <div class="card" style="width: 18rem; overflow:hidden">
+                        <div class="card-img-wrapper" style="overflow:hidden; height:160px">
+                            <img class="card-img-top" src="{{ url_for('static', filename=restaurant.restaurant_id + '.jpg')}}" alt="{{"Image of" + restaurant.restaurant_name}}">
+                        </div>
+                        <div class="card-body">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-8 p-0">
+                                    <h5 class="card-title">{{ restaurant.restaurant_name }}</h5>
+                                    </div>
+                                    <div class="col p-0">
+                                        <h6 class="card-subtitle text-success" style="margin: 0 auto; text-align:right">
+                                            <span>{{restaurant.price * '$'}}</span><span class="text-muted">{{(4 - restaurant.price) * '$'}}</span>
+                                        </h6>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h6 class="card-subtitle mb-2 text-muted">{{restaurant.type}}</h6>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <h3>{{username}} has no Favorites! <h3>
+    {% endif %}
+</div>
+<div class="row">
+    <div class="col">
+        <h2> {{username}}'s Reviews: <small class="float-right">{{ reviews.count() }} reviews</small></h2>
+        <ul class="media-list">
+            {% for review in reviews %}
+            <li class="media review-item">
+                <div class="media-body">
+                    <span class="float-right">
+                        <small>{{ review.date }}</small>
+                    </span>
+                    <strong>
+                     <a href="{{ url_for('restaurants.restaurant_detail', id=review.restaurant.restaurant_id) }}">
+                            {{ review.restaurant.restaurant_name }}
+                        </a>
+                    </strong>
+                    {{ review.stars }}/5
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#D5AB55" d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
+                    <p>
+                        {{ review.content }}
+                    </p>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
