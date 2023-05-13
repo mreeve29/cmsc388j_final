@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 
 from datetime import datetime
 import os
-import dotenv
+from dotenv import load_dotenv
 
 db = MongoEngine()
 login_manager = LoginManager()
@@ -20,11 +20,14 @@ def page_not_found(e):
     return render_template("404.html"), 404
 
 def create_app(test_config=None):
+    load_dotenv()
+
     app = Flask(__name__)
 
-    app.config.from_pyfile("config.py", silent=False)
-    if test_config is not None:
-        app.config.update(test_config)
+    app.config.update(
+        SECRET_KEY=os.environ.get("SECRET_KEY"),
+        MONGODB_HOST=os.environ.get("MONGODB_HOST")
+    )
 
     db.init_app(app)
     login_manager.init_app(app)
