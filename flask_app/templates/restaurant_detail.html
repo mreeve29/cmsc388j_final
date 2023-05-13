@@ -50,7 +50,7 @@
             </div>
         {% endif %}
     {% else %}
-        <a href="{{url_for('users.login')}}" type="button" class="btn btn-primary rating-btn mx-auto">Login To Edit Favorites</a>
+        <a href="{{url_for('users.login')}}" type="button" style="width:85%" class="btn btn-primary rating-btn mx-auto">Login To Edit Favorites</a>
     {% endif %}
     </div>
     </div>
@@ -71,7 +71,7 @@
           <span class="float-right">
             <small>{{ review.date }}</small>
           </span>
-          <a href="{{ url_for('restaurants.user_detail', username=review.commenter.username) }}">
+          <a href="{{ url_for('users.user_detail', username=review.commenter.username) }}">
             <strong>@{{ review.commenter.username }}</strong>
           </a>
           <p>

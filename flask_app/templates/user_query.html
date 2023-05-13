@@ -1,0 +1,27 @@
+{% extends "header.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    {% if n == 1 %}
+        <h1>{{n}} Result for "{{query}}"</h1>
+    {% else %}
+        <h1>{{n}} Results for "{{query}}"</h1>
+    {% endif %}
+</div>
+{% if users%}
+    {% for user, review_count in users %}
+        <div class="row justify-content-center">
+            <div class="card w-75">
+                <div class="card-body">
+                    <h5 class="card-title">{{user.username}}</h5>
+                    {% if review_count == 1%}
+                        <p class="card-text">{{review_count}} Review</p>
+                    {% else %}
+                        <p class="card-text">{{review_count}} Reviews</p>
+                    {% endif %}
+                    <a href="{{url_for('users.user_detail', username=user.username)}}" class="btn btn-primary">View Profile</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}

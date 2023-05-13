@@ -1,0 +1,23 @@
+{% extends "header.html" %}
+{% block content %}
+
+<div class="row justify-content-center">
+    <h1>Welcome to College Park Restaurant Finder!</h1>
+    <h3>Click a Restaurant's Card to View More Information!</h3>
+</div>
+<div class="row justify-content-center">
+        <iframe style="width:100%; height:400px"srcdoc="{{ratings_bar}}"></iframe>
+</div>
+<div class="row justify-content-center">
+        <iframe style="width:100%; height:400px"srcdoc="{{price_bar}}"></iframe>
+</div>
+<div class="row justify-content-center">
+        <iframe style="width:100%; height:400px"srcdoc="{{num_of_reviews_bar}}"></iframe>
+</div>
+<div class="row justify-content-center">
+        <iframe style="width:100%; height:400px"srcdoc="{{num_of_reviews_pie}}"></iframe>
+</div>
+<div class="row justify-content-center">
+        <iframe style="width:100%; height:400px"srcdoc="{{top_users_bar}}"></iframe>
+</div>
+{% endblock %}

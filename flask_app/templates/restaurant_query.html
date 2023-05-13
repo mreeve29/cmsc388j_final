@@ -1,9 +1,11 @@
 {% extends "header.html" %}
 {% block content %}
-
 <div class="row justify-content-center">
-    <h1>Welcome to College Park Restaurant Finder!</h1>
-    <h3>Click a Restaurant's Card to View More Information!</h3>
+    {% if n == 1 %}
+        <h1>{{n}} Result for "{{query}}"</h1>
+    {% else %}
+        <h1>{{n}} Results for "{{query}}"</h1>
+    {% endif %}
 </div>
 <div class="row justify-content-center">
         {% for restaurant in restaurants %}

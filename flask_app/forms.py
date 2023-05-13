@@ -13,6 +13,7 @@ from wtforms.validators import (
     ValidationError,
 )
 
+import re
 
 from .models import User
 
@@ -60,6 +61,19 @@ class RegistrationForm(FlaskForm):
         user = User.objects(email=email.data).first()
         if user is not None:
             raise ValidationError("Email is taken")
+        
+    def validate_password(self, password):
+        p = password.data
+        if len(p) < 12:
+            raise ValidationError("Password must be at least 12 characters")
+        if not bool(re.search(r'[A-Z]', p)):
+            raise ValidationError("Password must have an uppercase character")
+        if not bool(re.search(r'[a-z]', p)):
+            raise ValidationError("Password must have a lowercase character")
+        if not bool(re.search(r'[#@$&!]', p)):
+            raise ValidationError("Password must contain a special character")
+        if p[0] == ' ' or p[-1] == ' ':
+            raise ValidationError("Password cannot start or end with a space")
 
 
 class LoginForm(FlaskForm):

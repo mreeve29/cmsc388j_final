@@ -10,7 +10,7 @@
             {% for restaurant in restaurants %}
             <div class="col-auto my-2">
                 <a class="card-a" href="{{url_for('restaurants.restaurant_detail', id=restaurant.restaurant_id)}}">
-                    <div class="card" style="width: 18rem; overflow:hidden">
+                    <div class="card card-res" style="width: 18rem; overflow:hidden">
                         <div class="card-img-wrapper" style="overflow:hidden; height:160px">
                             <img class="card-img-top" src="{{ url_for('static', filename=restaurant.restaurant_id + '.jpg')}}" alt="{{"Image of" + restaurant.restaurant_name}}">
                         </div>

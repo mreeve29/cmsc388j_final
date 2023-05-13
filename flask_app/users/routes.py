@@ -2,8 +2,8 @@ from flask import Blueprint, redirect, url_for, render_template, flash
 from flask_login import current_user, login_required, login_user, logout_user
 
 from .. import bcrypt
-from ..forms import RegistrationForm, LoginForm, UpdateUsernameForm
-from ..models import User, Restaurant
+from ..forms import RegistrationForm, LoginForm, UpdateUsernameForm, SearchForm
+from ..models import User, Review
 
 users = Blueprint("users", __name__)
 
@@ -78,3 +78,35 @@ def favorites():
         "favorites.html",
         restaurants=favs,
     )
+
+@users.route("/users/search", methods=["GET", "POST"])
+def user_search():
+    search_form = SearchForm()
+
+    if search_form.validate_on_submit():
+        return redirect(url_for("users.user_query_results", query=search_form.search_query.data))
+
+    return render_template("search.html", form=search_form, msg="Search For a User: ")
+
+
+@users.route("/users/search/<query>", methods=["GET"])
+def user_query_results(query):
+    users = User.objects(username__iregex=query)
+    n = len(users)
+    reviews = []
+    if n == 0:
+        return render_template("user_query.html", users=None, query=query, n=n)
+    else:
+        for u in users:
+            reviews.append(len(Review.objects(commenter=u)))
+    
+
+    return render_template("user_query.html", users=list(zip(users,reviews)), query=query, n=n)
+
+@users.route("/user/<username>")
+def user_detail(username):
+    user = User.objects(username=username).first()
+    reviews = Review.objects(commenter=user)
+    restaurants = user.favorites
+
+    return render_template("user_detail.html", username=username, reviews=reviews, restaurants=restaurants)

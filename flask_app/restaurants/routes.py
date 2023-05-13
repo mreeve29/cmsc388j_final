@@ -1,9 +1,12 @@
 from flask import Blueprint, render_template, url_for, redirect, request, flash
 from flask_login import current_user
 
-from ..forms import RestaurantReviewForm, AddToFavoritesForm, RemoveFromFavoritesForm
+from ..forms import RestaurantReviewForm, AddToFavoritesForm, RemoveFromFavoritesForm, SearchForm
 from ..models import User, Review, Restaurant
 from ..utils import current_time
+
+import plotly.graph_objects as go
+import io
 
 from statistics import mean
 
@@ -15,11 +18,28 @@ restaurants = Blueprint("restaurants", __name__)
 def index():
     return render_template("index.html", restaurants=Restaurant.objects())
 
+@restaurants.route("/about", methods=["GET", "POST"])
+def about():
+    return render_template("about.html")
 
-#TODO: add searching
-# @restaurants.route("/search/<query>", methods=["GET"])
-# def search(query):
 
+@restaurants.route("/restaurant/search", methods=["GET", "POST"])
+def restaurant_search():
+    search_form = SearchForm()
+
+    if search_form.validate_on_submit():
+        print("hello")
+        return redirect(url_for("restaurants.restaurant_query_results", query=search_form.search_query.data))
+
+    return render_template("search.html", form=search_form, msg="Search For a Restaurant: ")
+
+
+@restaurants.route("/restaurant/search/<query>", methods=["GET"])
+def restaurant_query_results(query):
+    result = Restaurant.objects(restaurant_name__iregex=query)
+    n = len(result)
+
+    return render_template("restaurant_query.html", restaurants=result, query=query, n=n)
 
 @restaurants.route("/restaurant/<id>", methods=["GET", "POST"])
 def restaurant_detail(id):
@@ -45,7 +65,7 @@ def restaurant_detail(id):
     reviews = Review.objects(restaurant=result)
     star_rating = None
     if len(reviews) > 0:
-        star_rating = round(mean([x.stars for x in reviews]),1)
+        star_rating = round(mean([x.stars for x in reviews]), 1)
 
 
     fav_form = None
@@ -75,10 +95,85 @@ def restaurant_detail(id):
         fav_form=fav_form
     )
 
-@restaurants.route("/user/<username>")
-def user_detail(username):
-    user = User.objects(username=username).first()
-    reviews = Review.objects(commenter=user)
-    restaurants = user.favorites
 
-    return render_template("user_detail.html", username=username, reviews=reviews, restaurants=restaurants)
+@restaurants.route("/data")
+def plotly():
+    rests = Restaurant.objects()
+    reviews = Review.objects()
+    users = User.objects()
+
+    # charts:
+    # 1. ratings by restaurant bar chart - done
+    # 2. price per restaurant bar chart - done
+    # 2. reviews by restaurant bar chart - done
+    # 3. reviews by restaurant pie chart - done
+    # 4. reviews by user (top 5) bar chart 
+    
+
+    r_names = [r.restaurant_name for r in rests]
+
+    reviews_rest_bar_data = {k:[] for k in r_names}
+    for r in reviews:
+        r_name = r.restaurant.restaurant_name
+        reviews_rest_bar_data[r_name].append(r)
+    print(reviews_rest_bar_data)
+
+
+    ## RATINGS BAR CHART
+    ratings = [round(mean([x.stars for x in y]), 1) if len(y) >= 1 else 0 for y in reviews_rest_bar_data.values()]
+
+    ratings_bar_fig = go.Figure(data=[go.Bar(x=list(reviews_rest_bar_data.keys()), y=ratings)])
+    ratings_bar_f = io.StringIO()
+
+    ratings_bar_fig.write_html(ratings_bar_f)
+
+    ## PRICE BAR CHART
+    prices_bar_fig = go.Figure(data=[go.Bar(x=list(reviews_rest_bar_data.keys()), y=[x.price for x in rests])])
+    prices_bar_f = io.StringIO()
+
+    prices_bar_fig.write_html(prices_bar_f)
+
+    ## NUM OF REVIEWS BAR CHART
+    num_of_reviews = [len(x) for x in reviews_rest_bar_data.values()]
+
+    num_of_reviews_bar_fig = go.Figure(data=[go.Bar(x=list(reviews_rest_bar_data.keys()), y=num_of_reviews)])
+    num_of_reviews_bar_f = io.StringIO()
+
+    num_of_reviews_bar_fig.write_html(num_of_reviews_bar_f)
+
+
+    ## NUM OF REVIEWS PIE CHART
+    num_of_reviews_pie_fig = go.Figure(data=[go.Pie(labels=list(reviews_rest_bar_data.keys()), values=num_of_reviews)])
+    num_of_reviews_pie_f = io.StringIO()
+
+    num_of_reviews_pie_fig.write_html(num_of_reviews_pie_f)
+
+    ## TOP USERS BAR CHART
+
+    top_users = {k.username:0 for k in users}
+    for r in reviews:
+        uname = r.commenter.username
+        top_users[uname] += 1
+
+    print(top_users)
+
+    top_users_items = list(top_users.items())
+    top_users_items.sort(key=lambda x: x[1])
+    if len(top_users_items) > 5:
+        top_users_items = top_users_items[:4]
+
+    num_of_reviews_bar_fig = go.Figure(data=[go.Bar(
+        x=list(map(lambda x: x[0], top_users_items)), 
+        y=list(map(lambda x: x[1], top_users_items)),
+        name="hello")])
+    num_of_reviews_bar_f = io.StringIO()
+
+    num_of_reviews_bar_fig.write_html(num_of_reviews_bar_f)
+
+    return render_template(
+        "plots.html", 
+        ratings_bar = ratings_bar_f.getvalue(),
+        price_bar = prices_bar_f.getvalue(),
+        num_of_reviews_bar=num_of_reviews_bar_f.getvalue(),
+        num_of_reviews_pie=num_of_reviews_pie_f.getvalue(),
+        top_users_bar=num_of_reviews_bar_f.getvalue())
