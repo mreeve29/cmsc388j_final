@@ -1,7 +1,6 @@
 from flask_login import UserMixin
 from datetime import datetime
 from . import db, login_manager
-from . import config
 
 class Restaurant(db.Document):
     restaurant_name = db.StringField(required=True, min_length=1, max_length=20)
