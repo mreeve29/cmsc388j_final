@@ -105,9 +105,9 @@ def plotly():
     # charts:
     # 1. ratings by restaurant bar chart - done
     # 2. price per restaurant bar chart - done
-    # 2. reviews by restaurant bar chart - done
-    # 3. reviews by restaurant pie chart - done
-    # 4. reviews by user (top 5) bar chart 
+    # 3. reviews by restaurant bar chart - done
+    # 4. reviews by restaurant pie chart - done
+    # 5. reviews by user (top 5) bar chart 
     
 
     r_names = [r.restaurant_name for r in rests]
@@ -116,34 +116,38 @@ def plotly():
     for r in reviews:
         r_name = r.restaurant.restaurant_name
         reviews_rest_bar_data[r_name].append(r)
-    print(reviews_rest_bar_data)
 
 
     ## RATINGS BAR CHART
-    ratings = [round(mean([x.stars for x in y]), 1) if len(y) >= 1 else 0 for y in reviews_rest_bar_data.values()]
+    ratings = [(r,round(mean([x.stars for x in y]), 1)) if len(y) >= 1 else (r,0) for r,y in reviews_rest_bar_data.items()]
+    ratings.sort(key=lambda x: x[1], reverse=True)
 
-    ratings_bar_fig = go.Figure(data=[go.Bar(x=list(reviews_rest_bar_data.keys()), y=ratings)])
+    ratings_bar_fig = go.Figure(data=[go.Bar(x=list(map(lambda x: x[0],ratings)), y=list(map(lambda x: x[1],ratings)))])
+    ratings_bar_fig.update_layout(title="Star Rating Per Restaurant")
     ratings_bar_f = io.StringIO()
 
     ratings_bar_fig.write_html(ratings_bar_f)
 
     ## PRICE BAR CHART
     prices_bar_fig = go.Figure(data=[go.Bar(x=list(reviews_rest_bar_data.keys()), y=[x.price for x in rests])])
+    prices_bar_fig.update_layout(title="Price Per Restaurant")
     prices_bar_f = io.StringIO()
 
     prices_bar_fig.write_html(prices_bar_f)
 
     ## NUM OF REVIEWS BAR CHART
-    num_of_reviews = [len(x) for x in reviews_rest_bar_data.values()]
-
-    num_of_reviews_bar_fig = go.Figure(data=[go.Bar(x=list(reviews_rest_bar_data.keys()), y=num_of_reviews)])
+    num_of_reviews = [(r,len(n)) for r,n in reviews_rest_bar_data.items()]
+    num_of_reviews_bar_fig = go.Figure(data=[go.Bar(x=list(map(lambda x: x[0], num_of_reviews)), y=list(map(lambda x: x[1], num_of_reviews)))])
+    num_of_reviews_bar_fig.update_layout(title="Number of Reviews Per Restaurant - Bar Chart")
     num_of_reviews_bar_f = io.StringIO()
 
     num_of_reviews_bar_fig.write_html(num_of_reviews_bar_f)
 
 
     ## NUM OF REVIEWS PIE CHART
-    num_of_reviews_pie_fig = go.Figure(data=[go.Pie(labels=list(reviews_rest_bar_data.keys()), values=num_of_reviews)])
+    
+    num_of_reviews_pie_fig = go.Figure(data=[go.Pie(labels=list(map(lambda x: x[0], num_of_reviews)), values=list(map(lambda x: x[1], num_of_reviews)))])
+    num_of_reviews_pie_fig.update_layout(title="Number of Reviews Per Restaurant - Pie Chart")
     num_of_reviews_pie_f = io.StringIO()
 
     num_of_reviews_pie_fig.write_html(num_of_reviews_pie_f)
@@ -155,20 +159,18 @@ def plotly():
         uname = r.commenter.username
         top_users[uname] += 1
 
-    print(top_users)
-
     top_users_items = list(top_users.items())
-    top_users_items.sort(key=lambda x: x[1])
+    top_users_items.sort(key=lambda x: x[1], reverse=True)
     if len(top_users_items) > 5:
         top_users_items = top_users_items[:4]
 
-    num_of_reviews_bar_fig = go.Figure(data=[go.Bar(
+    users_num_of_reviews_bar_fig = go.Figure(data=[go.Bar(
         x=list(map(lambda x: x[0], top_users_items)), 
-        y=list(map(lambda x: x[1], top_users_items)),
-        name="hello")])
-    num_of_reviews_bar_f = io.StringIO()
+        y=list(map(lambda x: x[1], top_users_items)))])
+    users_num_of_reviews_bar_fig.update_layout(title="Top Users by Number of Reviews")
+    users_num_of_reviews_bar_f = io.StringIO()
 
-    num_of_reviews_bar_fig.write_html(num_of_reviews_bar_f)
+    users_num_of_reviews_bar_fig.write_html(users_num_of_reviews_bar_f)
 
     return render_template(
         "plots.html", 
@@ -176,4 +178,4 @@ def plotly():
         price_bar = prices_bar_f.getvalue(),
         num_of_reviews_bar=num_of_reviews_bar_f.getvalue(),
         num_of_reviews_pie=num_of_reviews_pie_f.getvalue(),
-        top_users_bar=num_of_reviews_bar_f.getvalue())
+        top_users_bar=users_num_of_reviews_bar_f.getvalue())
